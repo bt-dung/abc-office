@@ -102,6 +102,30 @@ export class UsersService {
     return this.findOne(id, requesterId, permissionScope);
   }
 
+  async updateProfileImage(
+    userId: number,
+    imageUrl: string,
+    type: 'avatar' | 'cover',
+    requesterId: number,
+    permissionScope: string,
+  ) {
+    // Thêm dòng này để kiểm tra quyền
+    this.assertOwnScope(permissionScope, requesterId, userId);
+    const fieldToUpdate = type === 'avatar' ? 'avatarUrl' : 'coverUrl';
+
+    await this.prisma.profile.upsert({
+      where: { user_id: userId },
+      update: {
+        [fieldToUpdate]: imageUrl,
+      },
+      create: {
+        user_id: userId,
+        full_name: '', // Sẽ được cập nhật sau bởi hàm update()
+        [fieldToUpdate]: imageUrl,
+      },
+    });
+  }
+
   async activate(id: number) {
     const user = await this.findOneEntity(id);
     user.activate();

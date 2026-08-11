@@ -6,7 +6,7 @@ import { useState, useEffect } from "react"
 import { usePathname, useRouter } from 'next/navigation';
 import styles from "./buttonBack.module.scss";
 
-const ButtonBack = () => {
+const ButtonBack = ({ to }) => {
     const router = useRouter();
     const [isScrolled, setIsScrolled] = useState(false);
     useEffect(() => {
@@ -16,9 +16,18 @@ const ButtonBack = () => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    const handleClick = () => {
+        if (to) {
+            router.push(to);
+        } else {
+            router.back();
+        }
+    };
+
     return (
         <div className={styles['sticky-anchor']}>
-            <button className={`${styles['btn-back']} ${isScrolled ? styles['scrolled'] : ''}`} onClick={() => router.back()}>
+            <button className={`${styles['btn-back']} ${isScrolled ? styles['scrolled'] : ''}`} onClick={handleClick}>
                 <span className={styles['icon-arrow-left']}><FontAwesomeIcon icon={faArrowLeft} /></span>
             </button>
         </div>

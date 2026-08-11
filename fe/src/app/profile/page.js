@@ -37,7 +37,7 @@ export default async function ProfilePage() {
     return (
         <main className={styles['profile-page']}>
             <div className={styles['profile-card']}>
-                <ButtonBack />
+                <ButtonBack to="/dashboard" />
                 <div className={styles['profile-cover']} style={{ backgroundImage: `url(${getMinioUrl(user.profile?.coverUrl || 'car.png')})` }}></div>
                 <div className={styles['profile-avatar']}>
                     <img src={getMinioUrl(user.profile?.avatarUrl || 'gon.jpeg')} alt="User Avatar" />

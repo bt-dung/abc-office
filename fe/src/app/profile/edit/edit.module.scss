@@ -6,6 +6,7 @@
   padding: 2rem;
   background-color: var(--background);
   min-height: 100dvh;
+  position: relative;
 }
 
 .card {
@@ -22,7 +23,7 @@
 .title {
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 2rem;
+  margin-bottom: 6rem;
   text-align: center;
   color: var(--header-text);
 }
@@ -30,7 +31,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .formGroup {
@@ -89,6 +90,11 @@
     }
   }
 }
+.readOnlyInput {
+  background-color: var(--input-disabled-background);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
 
 .actions {
   margin-top: 1.5rem;
@@ -136,5 +142,6 @@
   padding: 1rem;
   border-radius: $border-radius;
   text-align: center;
+  white-space: pre-wrap; // Để hiển thị các lỗi trên nhiều dòng
   font-weight: 500;
 }

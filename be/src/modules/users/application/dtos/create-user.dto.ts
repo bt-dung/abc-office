@@ -24,8 +24,6 @@ export class CreateUserDto {
     message: 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt',
   })
   password!: string;
-  @IsString()
-  phone!: string;
 
   @IsInt()
   role_id!: number;

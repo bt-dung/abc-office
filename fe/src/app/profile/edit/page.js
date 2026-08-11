@@ -9,7 +9,6 @@ import ImageUploader from '@/ui/imageUploader/ImageUploader';
 
 const getMinioUrl = (objectKey) => {
     if (!objectKey) return null;
-    // process.env.NEXT_PUBLIC_MINIO_PUBLIC_URL được cung cấp từ docker-compose.
     return `${process.env.NEXT_PUBLIC_MINIO_PUBLIC_URL}/${objectKey}`;
 }
 
@@ -67,40 +66,59 @@ export default function EditProfilePage() {
         setError('');
 
         startTransition(async () => {
-            try {
-                if (!user) {
-                    setError("Không thể xác định người dùng để cập nhật.");
-                    return;
-                }
-                const updateData = {
+            if (!user) {
+                setError("Không thể xác định người dùng để cập nhật.");
+                return;
+            }
+
+            const operations = [];
+
+            operations.push({
+                name: 'Cập nhật thông tin',
+                promise: updateUserProfile(user.id, {
                     username: formData.username,
                     email: formData.email,
                     profile: {
                         full_name: formData.fullName,
                         phone: formData.phone,
                     },
-                };
+                })
+            });
 
-                // 1. Cập nhật thông tin dạng chữ
-                await updateUserProfile(user.id, updateData);
+            if (avatarFile) {
+                const avatarFormData = new FormData();
+                avatarFormData.append('file', avatarFile);
+                operations.push({
+                    name: 'Tải lên ảnh đại diện',
+                    promise: uploadProfileImage(user.id, 'avatar', avatarFormData)
+                });
+            }
 
-                // 2. Tải lên ảnh đại diện nếu có
-                if (avatarFile) {
-                    const avatarFormData = new FormData();
-                    avatarFormData.append('file', avatarFile);
-                    await uploadProfileImage(user.id, 'avatar', avatarFormData);
+            if (coverFile) {
+                const coverFormData = new FormData();
+                coverFormData.append('file', coverFile);
+                console.log("Uploading cover image:", coverFile);
+                operations.push({
+                    name: 'Tải lên ảnh bìa',
+                    promise: uploadProfileImage(user.id, 'cover', coverFormData)
+                });
+            }
+            console.log("operations:", operations);
+
+            const results = await Promise.allSettled(operations.map(op => op.promise));
+
+            const failedOperations = [];
+            results.forEach((result, index) => {
+                if (result.status === 'rejected') {
+                    const reason = result.reason?.message || 'Lỗi không xác định';
+                    failedOperations.push(`- ${operations[index].name}: ${reason}`);
                 }
+            });
 
-                // 3. Tải lên ảnh bìa nếu có
-                if (coverFile) {
-                    const coverFormData = new FormData();
-                    coverFormData.append('file', coverFile);
-                    await uploadProfileImage(user.id, 'cover', coverFormData);
-                }
-
+            if (failedOperations.length > 0) {
+                setError(failedOperations.join('\n'));
+            } else {
                 router.push('/profile');
-            } catch (err) {
-                setError(err.message || 'Cập nhật thông tin thất bại. Vui lòng thử lại.');
             }
         });
     };
@@ -123,7 +141,7 @@ export default function EditProfilePage() {
 
                     <div className={styles.formGroup}>
                         <label htmlFor="username">Username</label>
-                        <input type="text" id="username" name="username" value={formData.username} onChange={handleInputChange} required placeholder="Chưa có thông tin" />
+                        <input type="text" id="username" name="username" value={formData.username} readOnly className={styles.readOnlyInput} />
                     </div>
 
                     <div className={styles.formGroup}>
