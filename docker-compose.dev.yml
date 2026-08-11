@@ -1,0 +1,49 @@
+services:
+  be:
+    # Đảm bảo BE chỉ khởi động sau khi DB đã sẵn sàng
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    build:
+      target: dev
+    init: true
+    environment:
+      NODE_ENV: development
+      # MinIO Config for Backend
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: ${MINIO_PORT:-9000}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET:-abc-office}
+      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
+    volumes:
+      # Ánh xạ toàn bộ source code backend để hỗ trợ hot-reloading
+      - ./be:/app
+      - /app/node_modules
+    command: sh /app/docker-entrypoint.dev.sh
+
+  fe:
+    build:
+      target: dev
+    init: true
+    # Đảm bảo FE chỉ khởi động sau khi BE đã sẵn sàng
+    depends_on:
+      - be
+    environment:
+      NODE_ENV: development
+      # Cung cấp địa chỉ của backend cho frontend
+      BE_API_URL: http://be:5000
+      # Cung cấp URL công khai của MinIO để hiển thị ảnh (tiền tố NEXT_PUBLIC_ để Next.js nhận diện)
+      NEXT_PUBLIC_MINIO_PUBLIC_URL: http://localhost:${MINIO_PORT:-9000}/${MINIO_BUCKET:-abc-office}
+      # Sửa lỗi DNS resolution của Node.js trong Docker
+      NODE_OPTIONS: --dns-result-order=ipv4first
+      # Bật chế độ polling để Next.js nhận diện thay đổi file đáng tin cậy hơn trong Docker
+      WATCHPACK_POLLING: "true"
+    volumes:
+      # Ánh xạ toàn bộ source code frontend để hỗ trợ hot-reloading
+      - ./fe:/app
+      - /app/node_modules
+      - /app/.next
+    command: sh /app/docker-entrypoint.dev.sh

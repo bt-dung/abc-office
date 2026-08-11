@@ -1,0 +1,140 @@
+@use "@/styles/abstracts/variables" as *;
+@use "@/styles/abstracts/mixins" as *;
+
+.container {
+  @include flex-center;
+  padding: 2rem;
+  background-color: var(--background);
+  min-height: 100dvh;
+}
+
+.card {
+  background-color: var(--card-background);
+  color: var(--foreground);
+  border-radius: $border-radius;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--border);
+  padding: 2rem;
+  width: min(100%, 600px);
+  position: relative;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: var(--header-text);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    width: auto;
+    align-self: center;
+  }
+
+  input[type="text"],
+  input[type="tel"],
+  input[type="email"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.75rem 1rem;
+    border-radius: $border-radius;
+    border: 1px solid var(--border-green);
+    background-color: var(--input-background);
+    color: var(--foreground);
+    font-size: 1rem;
+
+    @include transition-ease;
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      box-shadow: 0 0 0 2px rgba($primary, 0.2);
+    }
+  }
+
+  input[type="file"] {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    width: 100%;
+    max-width: 400px;
+    &::file-selector-button {
+      padding: 0.5rem 1rem;
+      border-radius: $border-radius;
+      border: 1px solid var(--border);
+      background-color: var(--button-secondary-background);
+      color: var(--button-secondary-foreground);
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 1rem;
+      @include transition-ease;
+
+      &:hover {
+        background-color: var(--button-secondary-hover-background);
+      }
+    }
+  }
+}
+
+.actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.btn {
+  @include flex-center;
+  @include transition-ease;
+  border-radius: $border-radius;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btnPrimary {
+  background-color: $primary;
+  color: $text-light;
+  &:hover:not(:disabled) {
+    background-color: $hover-color;
+  }
+}
+
+.btnSecondary {
+  background-color: var(--button-secondary-background);
+  color: var(--button-secondary-foreground);
+  border: 1px solid var(--border);
+  &:hover:not(:disabled) {
+    background-color: var(--button-secondary-hover-background);
+  }
+}
+
+.error {
+  color: var(--destructive);
+  background-color: var(--destructive-foreground);
+  padding: 1rem;
+  border-radius: $border-radius;
+  text-align: center;
+  font-weight: 500;
+}

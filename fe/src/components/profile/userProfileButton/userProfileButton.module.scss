@@ -1,0 +1,29 @@
+@use '@/styles/abstracts/variables' as *;
+@use '@/styles/abstracts/mixins' as *;
+
+
+.profile-wrapper {
+  @include flex-center;
+  position: relative;
+
+  div.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: $z-index-dropdown;
+
+    min-width: 220px;
+    background-color: $dropdown-bg;
+    border-radius: $dropdown-border-radius;
+    box-shadow: $dropdown-shadow;
+    padding: 8px 0;
+
+    @include dropdown-hidden;
+    transition: all $transition-speed cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.open {
+      @include dropdown-visible;
+    }
+
+  }
+}

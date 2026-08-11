@@ -1,0 +1,8 @@
+@use '@/styles/abstracts/mixins' as *;
+.list-option-profile {
+  @include flex-center;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+  width: 100%;
+}

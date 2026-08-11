@@ -1,0 +1,109 @@
+@use '@/styles/abstracts/variables' as *;
+.attendanceItem {
+    min-height: 100px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.attendanceItem:not(.paddingClass):hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    cursor: pointer;
+}
+
+.paddingClass {
+    background: var(--contact-bg);
+    border: 1px dashed var(--border-color);
+}
+
+.dayHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.dayNum {
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.statusText {
+    font-size: 1rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.timeInfo {
+    margin-top: 10px;
+}
+
+.timeRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    color: $text-light;
+}
+
+.timeLabel {
+    font-weight: 400;
+}
+
+.timeValue {
+    font-weight: 600;
+}
+
+/* Các class trạng thái (Sử dụng camelCase) */
+.statusOnTime {
+    background: #e6fffa !important;
+    border-left: 5px solid #38a169;
+    .dayNum, .statusText { color: #234e52; }
+}
+
+.statusLate {
+    background: #fffaf0 !important;
+    border-left: 5px solid #dd6b20;
+    .dayNum, .statusText { color: #7b341e; }
+}
+
+.statusAbsent {
+    background: #fff5f5 !important;
+    border-left: 5px solid #e53e3e;
+    .dayNum, .statusText { color: #822727; }
+}
+
+.statusWeekend {
+    background: #f7fafc !important;
+    border-left: 5px solid #4a5568;
+    .dayNum, .statusText { color: #4a5568; }
+}
+
+.statusIncomplete {
+    background: #edf2f7 !important;
+    border-left: 5px solid #2d3748;
+    .dayNum, .statusText { color: #2d3748; }
+}
+.isToday {
+    background-color: #fff9c4 !important;
+    border: 2px solid #fbc02d;
+    transform: scale(1.02);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 1;
+    .dayNum, .statusText {
+        color: $text-light;
+    }
+}
+.todayLabel {
+    font-size: 0.8rem;
+    background: #fbc02d;
+    color: #000;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+}

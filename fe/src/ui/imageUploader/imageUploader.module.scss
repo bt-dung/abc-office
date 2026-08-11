@@ -1,0 +1,88 @@
+@use "@/styles/abstracts/variables" as *;
+@use "@/styles/abstracts/mixins" as *;
+
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+}
+
+.wrapper {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  cursor: pointer;
+}
+
+.variant {
+  position: relative;
+  overflow: hidden;
+  border: 2px dashed var(--border);
+  background-color: var(--input-background);
+  @include transition-ease;
+
+  &:hover {
+    border-color: $primary;
+    .editIconWrapper {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+}
+
+.imagePreview {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.editIconWrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  @include flex-center;
+  opacity: 0;
+  @include transition-ease;
+  pointer-events: none;
+}
+
+.emptyState {
+  @include flex-center;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+
+  svg {
+    font-size: 1.5rem;
+  }
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+
+.cover {
+  width: 100%;
+  height: 120px;
+  border-radius: $border-radius;
+}

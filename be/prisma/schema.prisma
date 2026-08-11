@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SUSPENDED
+}
+
+model User {
+  id         Int          @id @default(autoincrement())
+  username   String       @unique
+  email      String       @unique
+  pw         String
+  status     UserStatus   @default(PENDING)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  // Quan hệ
+  role_id    Int
+  role       Role         @relation(fields: [role_id], references: [id])
+  dept_id    Int?
+  department Department?   @relation(fields: [dept_id], references: [id])
+  position_id Int?
+  position   Position?    @relation(fields: [position_id], references: [id])
+  
+  profile    Profile?
+  attendances Attendance[]
+  contacts   Contact[]    @relation("UserContacts")
+  assigned_customers Customer[] @relation("AssignedUser")
+  refreshTokens RefreshToken[]
+  auditLogs  AuditLog[]
+  projects   Project[]    // Thêm quan hệ với Project
+}
+
+model Profile {
+  user_id    Int      @id
+  user       User     @relation(fields: [user_id], references: [id])
+  full_name  String
+  avatarUrl  String?  @db.Text
+  coverUrl   String?  @db.Text
+  email      String?
+  dob        DateTime?
+  address    String?
+  phone      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  users       User[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id    Int              @id @default(autoincrement())
+  name  String           @unique
+  roles RolePermission[]
+}
+
+model RolePermission {
+  role_id       Int
+  permission_id Int
+  scope         String? // e.g., 'read:all', 'write:own'
+
+  role       Role       @relation(fields: [role_id], references: [id])
+  permission Permission @relation(fields: [permission_id], references: [id])
+
+  @@id([role_id, permission_id])
+}
+
+// --- QUẢN LÝ TỔ CHỨC ---
+
+model Department {
+  id         Int      @id @default(autoincrement())
+  name       String
+  manager_id Int?
+  parent_id  Int?
+
+  users      User[]
+  // Quan hệ tự tham chiếu cho phòng ban cha-con
+  parent     Department?  @relation("DeptToDept", fields: [parent_id], references: [id])
+  children   Department[] @relation("DeptToDept")
+}
+
+model Position {
+  id          Int    @id @default(autoincrement())
+  title       String
+  dept_id     Int
+  base_salary Float?
+
+  users       User[]
+}
+
+// --- QUẢN LÝ CHẤM CÔNG ---
+
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  user_id   Int
+  user      User     @relation(fields: [user_id], references: [id])
+  work_date DateTime @db.Date
+  check_in  DateTime?
+  check_out DateTime?
+  status    String?  // e.g., 'Present', 'Late', 'Absent'
+}
+
+// --- QUẢN LÝ CONTACT & CUSTOMER ---
+
+model Contact {
+  id           Int      @id @default(autoincrement())
+  owner_id     Int
+  owner        User     @relation("UserContacts", fields: [owner_id], references: [id])
+  name         String
+  phone        String?
+  email        String?
+  contact_type String?
+  is_shared    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  customers    Customer[]
+}
+
+model Customer {
+  id                 Int      @id @default(autoincrement())
+  contacts_id        Int
+  contact            Contact  @relation(fields: [contacts_id], references: [id])
+  company_name       String?
+  assigned_to_user_id Int?
+  assigned_to        User?    @relation("AssignedUser", fields: [assigned_to_user_id], references: [id])
+  status             String?
+  created_at         DateTime @default(now())
+}
+
+// --- AUTH & AUDIT ---
+
+model RefreshToken {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  user       User      @relation(fields: [user_id], references: [id])
+  token_hash String    @unique
+  expires_at DateTime
+  revoked_at DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  user_id    Int?
+  user       User?    @relation(fields: [user_id], references: [id])
+  action     String
+  entity     String
+  entity_id  Int?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}
+
+// Bảng mới: Project
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  owner_id    Int
+  owner       User     @relation(fields: [owner_id], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -1,0 +1,29 @@
+.board-attendance {
+    width: 100%;
+    background: var(--contact-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    padding: 20px;
+
+    .weekHeader {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+
+        .weekDay {
+            text-align: center;
+            font-weight: 700;
+            color: var(--text-color);
+            font-size: 1.4rem;
+        }
+    }
+
+    .attendance-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+    }
+}

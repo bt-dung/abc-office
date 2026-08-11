@@ -1,0 +1,52 @@
+@use "../styles/abstracts" as *;
+
+:root {
+  --background: #{$bg-light};
+  --foreground: #{$text-light};
+  --header-bg: #{$bg-light};
+  --header-text: #{$text-light};
+  --header-border: #{$border-light};
+  --contact-bg: #{$bg-light};
+  --contact-text: #{$text-light};
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+  --border-color: #e0e0e0;
+  --table-header: #fafafa;
+  --table-hover: #f8fbff;
+  --text-muted: #666666;
+  --text-heading: #2c3e50;
+  --shadow: rgba(0, 0, 0, 0.05);
+  --color-card-background: #ffffff;
+  --color-border: #e2e8f0;
+  --color-rainbow-200: #a78bfa;
+  --color-blue-300: #3b82f6;
+  --border-green: #88bda4;
+}
+
+[data-theme="dark"] {
+  --background: #{$bg-dark};
+  --foreground: #{$text-dark};
+  --header-bg: #{$bg-dark};
+  --header-text: #{$text-dark};
+  --header-border: #{$border-dark};
+  --contact-bg: #{$bg-dark};
+
+  --contact-text: #{$text-dark};
+
+  --card-bg: #1e1e1e;
+
+  --input-bg: #2d2d2d;
+
+  --border-color: #3d3d3d;
+
+  --table-header: #252525;
+
+  --table-hover: #2a2a2a;
+
+  --text-muted: #aaaaaa;
+
+  --text-heading: #ecf0f1;
+
+  --shadow: rgba(0, 0, 0, 0.3);
+  --border-green: #d99b7f;
+}

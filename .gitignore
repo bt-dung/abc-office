@@ -1,0 +1,15 @@
+# File chứa các biến môi trường nhạy cảm
+.env
+
+# Các thư mục chứa dependencies
+**/node_modules
+
+# Các thư mục build
+**/dist
+**/.next
+
+# Logs
+npm-debug.log*
+
+# Các file hệ thống
+.DS_Store

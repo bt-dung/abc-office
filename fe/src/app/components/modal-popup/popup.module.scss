@@ -1,0 +1,85 @@
+.popup {
+    margin-right: 30px;
+    button {
+      background-color: #fff;
+      border: 1px solid #8FC16E;
+      cursor: pointer;
+      border-radius: 15px;
+      padding: 8px;
+      transition: all 0.3s ease-in-out;
+      &:hover {
+        transform: scale(1.1);
+        background-color: #8FC16E;
+        color: #fff;
+        border: none;
+      }
+    }
+    .popupContent {
+        width: 400px;
+        height: 400px;
+        margin: auto;
+        border: solid 1px #8FC16E;
+        border-radius: 10px;
+        .bodyPopup {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          height: 100%;
+
+          h1{
+            font-size: 32px;
+            font-weight: bold;
+            position: relative;
+            top:0;
+          }
+        }
+    }
+}
+.pageWrapper {
+    display: flex;
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    align-items: center;     /* Căn giữa theo chiều dọc */
+    min-height: 100vh;       /* Chiều cao bằng 100% màn hình (viewport height) */
+    margin: 0;               /* Xóa margin mặc định của trình duyệt */
+    background-color: #F9FAEC; /* Màu nền vàng nhạt để dễ quan sát */
+}
+.timeline-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 6px;
+  height: 72px; /* Chuẩn kích thước tổng */
+  padding-top: 1px; /* Đẩy đường kẻ xuống 1px theo đúng 'top: 1px' */
+  gap: 4px; /* Chuẩn khoảng cách giữa đường và chấm */
+  box-sizing: border-box; /* Đảm bảo padding không làm tăng chiều cao tổng */
+}
+
+.line {
+  width: 2px; /* Bề ngang thực tế của nét vẽ */
+  height: 60px; /* Chuẩn chiều cao */
+  border-radius: 2px;
+  background: linear-gradient(to bottom, rgba(143, 193, 110, 0) 0%, #8FC16E 100%);
+}
+
+.dot {
+  width: 6px; /* Chuẩn kích thước chấm tròn */
+  height: 6px;
+  background-color: #8FC16E;
+  border-radius: 50%;
+  flex-shrink: 0; /* Ngăn dấu chấm bị bóp méo nếu kích thước khung thay đổi */
+}
+.buttonModal {
+  background-color: #8FC1;
+  cursor: pointer;
+  border-radius: 15px;
+  padding: 8px;
+  transition: all 0.3s ease-in-out;
+  &:hover {
+    transform: scale(1.1);
+    background-color: #8FC16E;
+    color: #fff;
+    border: none;
+  }
+}

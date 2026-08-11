@@ -1,0 +1,32 @@
+@use '@/styles/abstracts/mixins' as *;
+@use '@/styles/abstracts/variables' as *;
+
+.header-dashboard {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  padding: 0 1rem;
+  background-color: var(--header-bg);
+  color: var(--header-text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-center {
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.header-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}

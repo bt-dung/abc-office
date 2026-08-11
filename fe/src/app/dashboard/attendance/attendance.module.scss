@@ -1,0 +1,61 @@
+@use '@/styles/abstracts/variables' as *;
+@use '@/styles/abstracts/mixins' as *;
+
+.attendance-page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    padding: 2rem;
+    background-color: var(--contact-bg);
+    color: var(--contact-text);
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    &__header {
+        padding: 2rem;
+
+        .title {
+            font-size: 3.6rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin: 0;
+            transition: color 0.2s ease;
+        }
+    }
+
+    &__toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 0 2rem;
+    }
+}
+
+.attendance-statics {
+    display: flex;
+    gap: 3rem;
+
+    .statics-item {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        .statics-label {
+            font-weight: bold;
+        }
+
+        .statics-value {
+            font-size: 1.6rem;
+        }
+        .statics-on-time {
+            color: #38a169;
+        }
+        .statics-late{
+            color: #dd6b20;
+        }
+        .statics-absent{
+            color: #e53e3e;
+        }
+    }
+}

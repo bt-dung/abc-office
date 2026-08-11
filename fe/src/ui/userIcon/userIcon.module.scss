@@ -1,0 +1,20 @@
+.user-profile-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-icon {
+  font-size: 1.5rem;
+  border: 2px solid var(--header-border);
+  border-radius: 20%;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+
+.user-name {
+  font-size: 1rem;
+  color: var(--header-text);
+  margin-right: 1rem;
+  user-select: none;
+}

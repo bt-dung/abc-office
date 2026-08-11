@@ -1,0 +1,61 @@
+@use "@/styles/abstracts/_variables.scss" as *;
+
+.toggleWrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  background-color: #e2e8f0; 
+  border-radius: 30px;       // Bo tròn khung
+  padding: 4px;
+  width: 76px;               // Tổng chiều rộng của công tắc
+  height: 38px;              // Chiều cao của công tắc
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.iconBtn {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 2;                
+  color: #64748b;           
+  transition: color 0.3s ease;
+  height: 100%;
+  padding: 0;
+
+  &.active {
+    color: #ffffff;
+  }
+}
+
+
+.slider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);   
+  height: calc(100% - 8px);
+  background-color: #3b82f6; 
+  border-radius: 20px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+  z-index: 1;
+
+  &.lightActive {
+    transform: translateX(0); 
+  }
+
+  &.darkActive {
+    transform: translateX(100%); 
+  }
+}
+
+:global([data-theme='dark']) .toggleWrapper {
+  background-color: #334155; 
+}
+:global([data-theme='dark']) .slider {
+  background-color: #6366f1; 
+}

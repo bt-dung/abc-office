@@ -1,0 +1,21 @@
+.btn-sidebar-toggle {
+    display: none; // Hidden by default
+    background-color: transparent;
+    border: none;
+    color: var(--header-text);
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: var(--color-gray-alpha-100);
+    }
+
+    @media (max-width: 768px) {
+        display: inline-flex; // Show on mobile
+        align-items: center;
+        justify-content: center;
+    }
+}

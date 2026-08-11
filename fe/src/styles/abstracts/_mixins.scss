@@ -1,0 +1,39 @@
+@use '../abstracts/variables' as *;
+
+
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin transition-ease {
+  transition: all 0.3s ease;
+}
+
+@mixin button-variant($bg-color) {
+  background-color: $bg-color;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  border-radius: $border-radius;
+  border: 1px solid darken($bg-color, 10%);
+  color: white;
+  
+  &:hover { 
+    background-color: darken($bg-color, 15%);
+  }
+}
+
+@mixin dropdown-hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+@mixin dropdown-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
