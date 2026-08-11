@@ -1,17 +1,26 @@
-# File chứa các biến môi trường nhạy cảm
-.env
+### Môi trường & Bí mật ###
+# Không bao giờ commit các file chứa biến môi trường hoặc các khóa bí mật.
+# Dấu ! ở đầu để tạo ngoại lệ, đảm bảo file .env.example luôn được commit.
+.env*
+!.env.example
 
-# Các thư mục chứa dependencies
-**/node_modules
-
-# Các thư mục build
-**/dist
-**/.next
-
-# Logs
+### Logs ###
+# Các file log được tạo ra trong quá trình chạy hoặc debug.
+*.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Các file hệ thống
+### Hệ điều hành & File hệ thống ###
 .DS_Store
+Thumbs.db
 
+### Công cụ & Editor ###
+# Thư mục cache và cấu hình cục bộ của các công cụ phát triển.
 .claude/
+.codex/
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
