@@ -1,8 +1,15 @@
-export function hasPermission(user, permission) {
-    if (!user) {
+export function hasPermission(user, requiredPermissions) {
+    if (!user || !user.permissions || user.permissions.length === 0) {
         return false;
     }
+    const userPermissions = new Set(user.permissions.map(p => p.name));
 
-    return user.permissions.some(p => p.name === permission);
+    if (Array.isArray(requiredPermissions)) {
+        if (requiredPermissions.length === 0) {
+            return true;
+        }
+        return requiredPermissions.some(p => userPermissions.has(p));
+    }
+
+    return userPermissions.has(requiredPermissions);
 }
-

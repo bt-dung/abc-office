@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useTransition } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,20 +10,22 @@ import {
   faUserMinus,
 } from "@fortawesome/free-solid-svg-icons";
 import styles from "./departments.module.scss";
+import { Can } from "@/components/authorization/Can";
+import { Permission } from "@/auth/permissions";
+import { useAuth } from "@/auth/use-auth";
 import {
   createDepartment,
   addChildDepartment,
   updateDepartment,
   dissolveDepartment,
   assignUserToDepartment,
-  removeUserFromDepartment,
 } from "./actions";
 
-function DepartmentNode({ dept, depth, users, onAddChild, onEdit, onDissolve, onAssignStaff, onRemoveStaff }) {
+import MemberItem from "../../../ui/memberItem/MemberItem";
+
+function DepartmentNode({ dept, depth, users, positions, onAddChild, onEdit, onDissolve, onAssignStaff, currentUser }) {
   const members = users.filter((u) => u.dept_id === dept.id);
   const manager = users.find((u) => u.id === dept.manager_id);
-  console.log("thanh vien:", members);
-  console.log("quan ly:", manager);
 
   return (
     <div className={styles["dept-node"]}>
@@ -35,31 +36,54 @@ function DepartmentNode({ dept, depth, users, onAddChild, onEdit, onDissolve, on
           {manager ? `Quản lý: ${manager.username}` : "Chưa có quản lý"}
         </span>
         <div className={styles["dept-node__actions"]}>
-          <button onClick={() => onAssignStaff(dept)} title="Thêm nhân sự">
-            <FontAwesomeIcon icon={faUserPlus} />
-          </button>
-          <button onClick={() => onAddChild(dept)} title="Thêm phòng ban con">
-            <FontAwesomeIcon icon={faPlus} />
-          </button>
-          <button onClick={() => onEdit(dept)} title="Sửa">
-            <FontAwesomeIcon icon={faPen} />
-          </button>
-          <button onClick={() => onDissolve(dept)} title="Giải thể" className={styles["danger"]}>
-            <FontAwesomeIcon icon={faTrash} />
-          </button>
+          <Can permission={Permission.USERS_WRITE}>
+            {/* Policy: Manager can assign staff to their own department */}
+            {currentUser && (currentUser.role_id === 1 || (currentUser.role_id === 2 && currentUser.id === dept.manager_id)) && (
+              <button onClick={() => onAssignStaff(dept)} title="Thêm nhân sự" className={styles["icon-only"]}>
+                <FontAwesomeIcon icon={faUserPlus} />
+              </button>
+            )}
+          </Can>
+          <Can permission={Permission.DEPARTMENT_WRITE}>
+            <>
+              {/* Policy: Admin can add child, edit, dissolve any department. Manager cannot. */}
+              {/* The DEPARTMENT_WRITE permission is already checked by Can component. */}
+              {/* No additional check for manager here, as manager doesn't have DEPARTMENT_WRITE */}
+              <button onClick={() => onAddChild(dept)} title="Thêm phòng ban con">
+                <FontAwesomeIcon icon={faPlus} />
+              </button>
+              <button onClick={() => onEdit(dept)} title="Sửa">
+                <FontAwesomeIcon icon={faPen} />
+              </button>
+              <button
+                onClick={() => onDissolve(dept)}
+                title="Giải thể"
+                className={styles["danger"]}
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </button>
+            </>
+          </Can>
         </div>
       </div>
 
       {members.length > 0 && (
         <ul className={styles["dept-node__members"]} style={{ marginLeft: `${depth * 1.5 + 2.25}rem` }}>
-          {members.map((member) => (
-            <li key={member.id}>
-              <span>{member.username}</span>
-              <button onClick={() => onRemoveStaff(member)} title="Gỡ khỏi phòng ban">
-                <FontAwesomeIcon icon={faUserMinus} />
-              </button>
-            </li>
-          ))}
+          {members.map((member) => {
+            const position = positions.find((p) => p.id === member.position_id);
+            console.log("position:", position);
+            const departmentPositions = positions.filter((p) => p.dept_id === dept.id);
+            return (
+              <MemberItem
+                key={member.id}
+                member={member}
+                position={position}
+                currentUser={currentUser}
+                dept={dept}
+                departmentPositions={departmentPositions}
+              />
+            );
+          })}
         </ul>
       )}
 
@@ -71,11 +95,12 @@ function DepartmentNode({ dept, depth, users, onAddChild, onEdit, onDissolve, on
               dept={child}
               depth={depth + 1}
               users={users}
+              positions={positions}
+              currentUser={currentUser}
               onAddChild={onAddChild}
               onEdit={onEdit}
               onDissolve={onDissolve}
               onAssignStaff={onAssignStaff}
-              onRemoveStaff={onRemoveStaff}
             />
           ))}
         </div>
@@ -86,7 +111,8 @@ function DepartmentNode({ dept, depth, users, onAddChild, onEdit, onDissolve, on
 
 const emptyForm = { name: "", manager_id: "" };
 
-export default function DepartmentsClient({ initialDepartments, users, loadError }) {
+export default function DepartmentsClient({ initialDepartments, users, positions, loadError }) {
+  const { user: currentUser } = useAuth();
   const departments = initialDepartments;
   const [isPending, startTransition] = useTransition();
   const [modal, setModal] = useState(null); // { mode, parent?, target? }
@@ -135,17 +161,6 @@ export default function DepartmentsClient({ initialDepartments, users, loadError
     });
   }
 
-  function handleRemoveStaff(member) {
-    if (!window.confirm(`Gỡ "${member.username}" khỏi phòng ban?`)) return;
-    startTransition(async () => {
-      try {
-        await removeUserFromDepartment(member.id);
-      } catch (err) {
-        window.alert(err.message || "Không thể gỡ nhân sự khỏi phòng ban.");
-      }
-    });
-  }
-
   function handleSubmit(e) {
     e.preventDefault();
     startTransition(async () => {
@@ -179,10 +194,12 @@ export default function DepartmentsClient({ initialDepartments, users, loadError
     <main className={styles["dept-page"]}>
       <div className={styles["dept-page__header"]}>
         <h1 className={styles["title"]}>Phòng ban</h1>
-        <button className={styles["add-btn"]} onClick={openCreate}>
-          <FontAwesomeIcon icon={faPlus} />
-          <span>Thêm phòng ban</span>
-        </button>
+        <Can permission={Permission.DEPARTMENT_WRITE}>
+          <button className={styles["add-btn"]} onClick={openCreate}>
+            <FontAwesomeIcon icon={faPlus} />
+            <span>Thêm phòng ban</span>
+          </button>
+        </Can>
       </div>
 
       {loadError && <p className={styles["error-banner"]}>{loadError}</p>}
@@ -197,11 +214,12 @@ export default function DepartmentsClient({ initialDepartments, users, loadError
               dept={dept}
               depth={0}
               users={users}
+              positions={positions}
+              currentUser={currentUser} // Pass currentUser down
               onAddChild={openAddChild}
               onEdit={openEdit}
               onDissolve={handleDissolve}
               onAssignStaff={openAssignStaff}
-              onRemoveStaff={handleRemoveStaff}
             />
           ))
         )}

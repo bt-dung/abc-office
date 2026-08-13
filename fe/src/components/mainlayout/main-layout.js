@@ -6,7 +6,7 @@ import Sidebar from "../sidebar/sidebar";
 import styles from "./mainLayout.module.scss";
 
 
-const MainLayout = ({ children, user }) => {
+const MainLayout = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleSidebar = () => {
@@ -15,7 +15,7 @@ const MainLayout = ({ children, user }) => {
 
     return (
         <div className={`${styles['main-layout-container']} ${isSidebarOpen ? styles['sidebar-open'] : ''}`}>
-            <Header user={user} onToggleSidebar={toggleSidebar} />
+            <Header onToggleSidebar={toggleSidebar} />
             <div className={styles['main-layout-content']}>
                 <Sidebar isOpen={isSidebarOpen} />
                 <main className={styles['main-content-area']}>{children}</main>

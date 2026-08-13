@@ -19,6 +19,9 @@ const PERMISSIONS = [
   'departments:write',
   'users:read',
   'users:write',
+  'users:manage_position',
+  'positions:read',
+  'positions:write',
 ];
 
 const ROLE_PERMISSIONS = {
@@ -27,20 +30,28 @@ const ROLE_PERMISSIONS = {
     'departments:write': 'all',
     'users:read': 'all',
     'users:write': 'all',
+    'users:manage_position': 'all',
+    'positions:read': 'all',
+    'positions:write': 'all',
   },
   MANAGER: {
     'departments:read': 'all',
     'departments:write': 'own',
     'users:read': 'all',
     'users:write': 'own',
+    'users:manage_position': 'own',
+    'positions:read': 'all',
+    'positions:write': 'own',
   },
   USER: {
     'departments:read': 'own',
     'users:read': 'own',
     'users:write': 'own', // Cho phép người dùng tự cập nhật thông tin của mình
+    'positions:read': 'all',
   },
 };
 
+// Thông tin tài khoản admin mặc định
 const BOOTSTRAP_ADMIN = {
   username: 'admin',
   email: 'admin@abc-office.local',
@@ -76,6 +87,10 @@ async function main() {
     const role = roleByName[roleName];
     for (const [permissionName, scope] of Object.entries(permissions)) {
       const permission = permissionByName[permissionName];
+      if (!permission) {
+        console.warn(`Cảnh báo: Quyền '${permissionName}' được định nghĩa cho vai trò '${roleName}' nhưng không tồn tại trong danh sách PERMISSIONS. Bỏ qua...`);
+        continue;
+      }
       await prisma.rolePermission.upsert({
         where: {
           role_id_permission_id: {
@@ -139,7 +154,7 @@ async function main() {
         title: pos.title,
         dept_id: pos.dept_id,
       },
-    });
+    })
     if (!existing) {
       await prisma.position.create({
         data: pos,

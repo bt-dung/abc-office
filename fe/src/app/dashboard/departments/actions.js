@@ -44,12 +44,3 @@ export async function assignUserToDepartment(userId, deptId) {
   revalidatePath("/dashboard/departments");
   revalidatePath("/dashboard/users");
 }
-
-export async function removeUserFromDepartment(userId) {
-  await beJson(`/users/${userId}`, {
-    method: "PATCH",
-    body: JSON.stringify({ dept_id: null }),
-  });
-  revalidatePath("/dashboard/departments");
-  revalidatePath("/dashboard/users");
-}

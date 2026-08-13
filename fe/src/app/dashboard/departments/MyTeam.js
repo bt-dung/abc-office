@@ -1,8 +1,9 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserGroup } from "@fortawesome/free-solid-svg-icons";
 import styles from "./departments.module.scss";
+import MemberItem from "../../../ui/memberItem/MemberItem";
 
-export default function MyTeam({ team, loadError }) {
+export default function MyTeam({ team, positions, loadError }) {
   console.log("team:", team);
   return (
     <div className={styles["dept-page"]}>
@@ -21,14 +22,18 @@ export default function MyTeam({ team, loadError }) {
 
         {!loadError && team?.members?.length > 0 && (
           <ul className={styles["dept-node__members"]}>
-            {team.members.map((member) => (
-              <li key={member.id}>
-                <span>
-                  <FontAwesomeIcon icon={faUserGroup} /> {member.username}
-                </span>
-                <span>{member.email}</span>
-              </li>
-            ))}
+            {team.members.map((member) => {
+              const position = positions.find((p) => p.id === member.position_id);
+
+              return (
+                <MemberItem
+                  key={member.id}
+                  member={member}
+                  position={position}
+                  email={member.email}
+                />
+              );
+            })}
           </ul>
         )}
       </div>

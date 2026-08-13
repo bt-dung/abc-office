@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
+import { PositionsModule } from './modules/positons/positions.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuditInterceptor } from './common/audit/audit.interceptor';
@@ -18,6 +19,7 @@ import { AuditInterceptor } from './common/audit/audit.interceptor';
     AuthModule,
     UsersModule,
     DepartmentsModule,
+    PositionsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -26,4 +28,4 @@ import { AuditInterceptor } from './common/audit/audit.interceptor';
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
   ],
 })
-export class AppModule {}
+export class AppModule { }

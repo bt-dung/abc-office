@@ -1,5 +1,5 @@
-@use '@/styles/abstracts/mixins' as *;
-@use '@/styles/abstracts/variables' as *;
+@use "@/styles/abstracts/mixins" as *;
+@use "@/styles/abstracts/variables" as *;
 
 .header-dashboard {
   width: 100%;
@@ -10,7 +10,9 @@
   padding: 0 1rem;
   background-color: var(--header-bg);
   color: var(--header-text);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .header-right {

@@ -10,26 +10,33 @@ export default async function DepartmentsPage() {
 
   if (!hasPermission(user, Permission.DEPARTMENT_WRITE)) {
     let team = null;
+    let positions = [];
     let loadError = null;
 
     try {
-      team = await beJson("/departments/me/members");
+      [team, positions] = await Promise.all([
+        beJson("/departments/me/members"),
+        beJson("/positions"),
+      ]);
     } catch (err) {
       loadError = err.message;
     }
 
-    return <MyTeam team={team} loadError={loadError} />;
+    return <MyTeam team={team} positions={positions} loadError={loadError} />;
   }
 
   let departments = [];
   let users = [];
+  let positions = [];
   let loadError = null;
 
   try {
-    [departments, users] = await Promise.all([
+    [departments, users, positions] = await Promise.all([
       beJson("/departments"),
       beJson("/users"),
+      beJson("/positions"), // Lấy danh sách tất cả các vị trí
     ]);
+    console.log("departments:", departments);
   } catch (err) {
     loadError = err.message;
   }
@@ -38,6 +45,7 @@ export default async function DepartmentsPage() {
     <DepartmentsClient
       initialDepartments={departments}
       users={users}
+      positions={positions}
       loadError={loadError}
     />
   );
