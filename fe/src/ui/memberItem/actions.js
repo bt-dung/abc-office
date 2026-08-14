@@ -13,7 +13,7 @@ export async function removeUserFromDepartment(userId) {
 }
 
 export async function assignPositionToUser(userId, positionId) {
-    await beJson(`/users/${userId}`, {
+    await beJson(`/users/${userId}/position/update`, {
         method: "PATCH",
         body: JSON.stringify({ position_id: positionId }),
     });
@@ -22,7 +22,7 @@ export async function assignPositionToUser(userId, positionId) {
 }
 
 export async function unassignPositionFromUser(userId) {
-    await beJson(`/users/${userId}`, {
+    await beJson(`/users/${userId}/position/update`, {
         method: "PATCH",
         body: JSON.stringify({ position_id: null }),
     });

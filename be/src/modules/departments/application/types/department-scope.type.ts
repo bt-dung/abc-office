@@ -1,0 +1,1 @@
+export type DepartmentScope = 'own' | 'all';

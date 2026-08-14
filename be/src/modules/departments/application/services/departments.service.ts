@@ -1,10 +1,12 @@
-import { Injectable, Inject, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, ForbiddenException, Logger, HttpException } from '@nestjs/common';
 import { I_DEPARTMENT_REPOSITORY } from '../../domain/repositories/department.repository.interface';
 import type { IDepartmentRepository } from '../../domain/repositories/department.repository.interface';
 import { CreateDepartmentDto } from '../dtos/create-department.dto';
 import { UpdateDepartmentDto } from '../dtos/update-department.dto';
 import { AddChildDepartmentDto } from '../dtos/add-child-department.dto';
 import { Department } from '../../domain/entities/department.entity';
+import type { DepartmentScope } from '../types/department-scope.type';
+
 
 @Injectable()
 export class DepartmentsService {
@@ -15,7 +17,7 @@ export class DepartmentsService {
     private readonly departmentRepo: IDepartmentRepository,
   ) { }
 
-  async create(dto: CreateDepartmentDto, requesterId: number, scope: string) {
+  async create(dto: CreateDepartmentDto, requesterId: number, scope: DepartmentScope) {
     // Tạo phòng ban gốc (không có cha) đòi hỏi quyền 'all' vì chưa có phòng ban
     // nào để xác định người dùng có phải là 'own' hay không.
     if (scope === 'own') {
@@ -26,10 +28,24 @@ export class DepartmentsService {
 
     try {
       const newDept = Department.createNew(dto.name, dto.parent_id ?? null, dto.manager_id ?? null);
-      return await this.departmentRepo.create(newDept);
+      const createdDepartment = await this.departmentRepo.create(newDept);
+      return createdDepartment;
     } catch (error) {
-      this.logger.error(`Lỗi khi tạo phòng ban: ${error.message}`);
-      throw new BadRequestException('Không thể tạo phòng ban. Vui lòng kiểm tra lại dữ liệu.');
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Lỗi không thể tạo phòng ban. Vui lòng kiểm tra lại thông tin!';
+
+      this.logger.error(
+        `Lỗi tạo phòng ban:${message}`,
+      );
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new BadRequestException('Lỗi không thể tạo phòng ban. Vui lòng kiểm tra lại thông tin!');
+
     }
   }
 
@@ -43,7 +59,7 @@ export class DepartmentsService {
     parentId: number,
     dto: AddChildDepartmentDto,
     requesterId: number,
-    scope: string,
+    scope: DepartmentScope,
   ) {
     // 1. Kiểm tra xem phòng ban cha có tồn tại không
     const parent = await this.findOne(parentId);
@@ -53,7 +69,8 @@ export class DepartmentsService {
     const newChildDept = Department.createNew(dto.name, parentId, dto.manager_id ?? null);
 
     // 3. Lưu vào database (Điều phối)
-    return await this.departmentRepo.create(newChildDept);
+    const createdDepartment = await this.departmentRepo.create(newChildDept);
+    return createdDepartment;
   }
 
   /**
@@ -79,7 +96,7 @@ export class DepartmentsService {
     };
   }
 
-  async findAll(requesterId: number, scope: string) {
+  async findAll(requesterId: number, scope: DepartmentScope) {
     const departments = await this.departmentRepo.findAll();
     if (scope === 'own') {
       return departments.filter((d) => d.manager_id === requesterId);
@@ -87,7 +104,7 @@ export class DepartmentsService {
     return departments;
   }
 
-  async findOne(id: number, requesterId?: number, scope?: string) {
+  async findOne(id: number, requesterId?: number, scope?: DepartmentScope) {
     const dept = await this.departmentRepo.findById(id);
     if (!dept) {
       throw new NotFoundException(`Phòng ban với ID ${id} không tồn tại`);
@@ -102,7 +119,7 @@ export class DepartmentsService {
     id: number,
     dto: UpdateDepartmentDto,
     requesterId: number,
-    scope: string,
+    scope: DepartmentScope,
   ) {
     const existingDept = await this.departmentRepo.findById(id);
     if (!existingDept) {
@@ -112,16 +129,31 @@ export class DepartmentsService {
 
     try {
       // Ra lệnh cho Entity tự cập nhật. Entity sẽ tự validate các quy tắc nội tại của nó.
-      existingDept.updateInfo({ name: dto.name, parent_id: dto.parent_id, manager_id: dto.manager_id });
-      return await this.departmentRepo.update(id, existingDept);
+      existingDept.updateInfo({ name: dto.name, parent_id: dto.parent_id });
+      if (dto.manager_id !== undefined) {
+        existingDept.changeManager(dto.manager_id ?? null);
+      }
+      const updatedDepartment = await this.departmentRepo.update(id, existingDept);
+      return updatedDepartment;
     } catch (error) {
-      // Bắt lỗi từ Entity và chuyển thành HTTP Exception phù hợp
-      this.logger.error(`Lỗi cập nhật phòng ban ID ${id}: ${error.message}`);
-      throw new BadRequestException(error.message || 'Cập nhật thất bại.');
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Cập nhật thất bại.';
+
+      this.logger.error(
+        `Lỗi cập nhật phòng ban ID ${id}: ${message}`,
+      );
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new BadRequestException('Cập nhật thất bại.');
     }
   }
 
-  async remove(id: number, requesterId: number, scope: string) {
+  async remove(id: number, requesterId: number, scope: DepartmentScope) {
     const existingDept = await this.departmentRepo.findById(id);
     if (!existingDept) {
       throw new NotFoundException(`Không tìm thấy phòng ban với ID ${id}`);
@@ -138,7 +170,7 @@ export class DepartmentsService {
   }
 
   private assertOwnScope(
-    scope: string,
+    scope: DepartmentScope,
     requesterId: number,
     managerId: number | null,
   ) {

@@ -1,4 +1,4 @@
-import {User} from '../../../users/domain/entities/user.entity';
+import { User } from '../../../users/domain/entities/user.entity';
 export class Department {
     // ... (constructor và các thuộc tính)
     constructor(
@@ -8,7 +8,7 @@ export class Department {
         public manager_id: number | null,
         public children: Department[] = [],
         public users: User[] = [],
-    ) {}
+    ) { }
 
     /**
      * Factory method để tạo một phòng ban con mới.
@@ -32,27 +32,32 @@ export class Department {
         this.users.push(user);
     }
 
-    public getId(): number | null {return this.id;}
-    public getName(): string {return this.name;}
-    public getParentId(): number | null {return this.parent_id;}
-    public getManagerId(): number | null {return this.manager_id;}
-    public getChildren(): Department[] {return this.children;}
-    public getUsers(): User[] {return this.users;}
+    public getId(): number | null { return this.id; }
+    public getName(): string { return this.name; }
+    public getParentId(): number | null { return this.parent_id; }
+    public getManagerId(): number | null { return this.manager_id; }
+    public getChildren(): Department[] { return this.children; }
+    public getUsers(): User[] { return this.users; }
 
-     public updateInfo(data: { name?: string; parent_id?: number | null; manager_id?: number | null; }) {
+    public updateInfo(data: {
+        name?: string;
+        parent_id?: number | null;
+    }) {
         if (data.name !== undefined) {
             this.name = data.name;
         }
+
         if (data.parent_id !== undefined) {
-            // Business Invariant: Một phòng ban không thể là cha của chính nó.
-            // `this.id` chỉ có giá trị khi entity được lấy từ DB, không phải khi mới tạo.
             if (this.id !== null && data.parent_id === this.id) {
-                throw new Error('Một phòng ban không thể tự làm cha của chính nó.');
+                throw new Error(
+                    'Một phòng ban không thể tự làm cha của chính nó.',
+                );
             }
+
             this.parent_id = data.parent_id;
         }
-        if (data.manager_id !== undefined) {
-            this.manager_id = data.manager_id;
-        }
+    }
+    public changeManager(managerId: number | null): void {
+        this.manager_id = managerId;
     }
 }

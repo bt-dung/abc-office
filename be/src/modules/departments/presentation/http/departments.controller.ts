@@ -3,15 +3,20 @@ import { DepartmentsService } from '../../application/services/departments.servi
 import { CreateDepartmentDto } from '../../application/dtos/create-department.dto';
 import { UpdateDepartmentDto } from '../../application/dtos/update-department.dto';
 import { AddChildDepartmentDto } from '../../application/dtos/add-child-department.dto';
+import { ChangeManagerDto } from '../../application/dtos/change-manager.dto';
 import { Permissions } from '../../../auth/presentation/decorators/permissions.decorator';
 import { CurrentUser } from '../../../auth/presentation/decorators/current-user.decorator';
 import { PermissionScope } from '../../../auth/presentation/decorators/permission-scope.decorator';
 import type { RequestUser } from '../../../auth/domain/types/request-user.type';
 import { Audit } from '../../../../common/audit/audit.decorator';
-
+import { ChangeDepartmentManagerUseCase } from '../../application/services/use-case/assign-dept-manager.use-case';
+import type { DepartmentScope } from '../../application/types/department-scope.type';
 @Controller('departments')
 export class DepartmentsController {
-  constructor(private readonly departmentsService: DepartmentsService) { }
+  constructor(
+    private readonly departmentsService: DepartmentsService,
+    private readonly changeDepartmentManagerUseCase: ChangeDepartmentManagerUseCase,
+  ) { }
 
   @Permissions('departments:write')
   @Audit('department:create', 'Department')
@@ -19,7 +24,7 @@ export class DepartmentsController {
   create(
     @Body() createDepartmentDto: CreateDepartmentDto,
     @CurrentUser() currentUser: RequestUser,
-    @PermissionScope() scope: string,
+    @PermissionScope() scope: DepartmentScope,
   ) {
     return this.departmentsService.create(createDepartmentDto, currentUser.id, scope);
   }
@@ -31,7 +36,7 @@ export class DepartmentsController {
     @Param('parentId', ParseIntPipe) parentId: number,
     @Body() addChildDepartmentDto: AddChildDepartmentDto,
     @CurrentUser() currentUser: RequestUser,
-    @PermissionScope() scope: string,
+    @PermissionScope() scope: DepartmentScope,
   ) {
     return this.departmentsService.addChildDepartment(
       parentId,
@@ -45,7 +50,7 @@ export class DepartmentsController {
   @Get()
   findAll(
     @CurrentUser() currentUser: RequestUser,
-    @PermissionScope() scope: string,
+    @PermissionScope() scope: DepartmentScope,
   ) {
     return this.departmentsService.findAll(currentUser.id, scope);
   }
@@ -61,7 +66,7 @@ export class DepartmentsController {
   findOne(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: RequestUser,
-    @PermissionScope() scope: string,
+    @PermissionScope() scope: DepartmentScope,
   ) {
     return this.departmentsService.findOne(id, currentUser.id, scope);
   }
@@ -73,18 +78,34 @@ export class DepartmentsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
     @CurrentUser() currentUser: RequestUser,
-    @PermissionScope() scope: string,
+    @PermissionScope() scope: DepartmentScope,
   ) {
     return this.departmentsService.update(id, updateDepartmentDto, currentUser.id, scope);
   }
 
+  @Permissions('departments:write')
+  @Audit('department:change_manager', 'Department')
+  @Patch(':id/manager')
+  changeManager(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() changeManagerDto: ChangeManagerDto,
+    @CurrentUser() currentUser: RequestUser,
+    @PermissionScope() scope: DepartmentScope,
+  ) {
+    return this.changeDepartmentManagerUseCase.execute(
+      id,
+      changeManagerDto.manager_id ?? null,
+      currentUser.id,
+      scope,
+    );
+  }
   @Permissions('departments:write')
   @Audit('department:dissolve', 'Department')
   @Delete(':id')
   remove(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() currentUser: RequestUser,
-    @PermissionScope() scope: string,
+    @PermissionScope() scope: DepartmentScope,
   ) {
     return this.departmentsService.remove(id, currentUser.id, scope);
   }

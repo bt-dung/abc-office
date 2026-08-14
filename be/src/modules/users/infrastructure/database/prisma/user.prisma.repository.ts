@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../../prisma/prisma.service';
 import {
   IUserRepository,
+  ProfileChanges,
   UserWithDetails,
 } from '../../../domain/repositories/user.repository.interface';
 import { User } from '../../../domain/entities/user.entity';
@@ -57,5 +58,19 @@ export class PrismaUserRepository implements IUserRepository {
       data,
     });
     return UserMapper.toDomain(updated);
+  }
+
+  async upsertProfile(userId: number, changes: ProfileChanges): Promise<void> {
+    await this.prisma.profile.upsert({
+      where: { user_id: userId },
+      update: changes,
+      create: {
+        user_id: userId,
+        full_name: changes.full_name ?? '',
+        phone: changes.phone,
+        avatarUrl: changes.avatarUrl,
+        coverUrl: changes.coverUrl,
+      },
+    });
   }
 }

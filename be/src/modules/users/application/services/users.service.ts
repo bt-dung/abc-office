@@ -1,11 +1,11 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../../../prisma/prisma.service';
 import { I_USER_REPOSITORY } from '../../domain/repositories/user.repository.interface';
 import type {
   IUserRepository,
@@ -15,13 +15,24 @@ import { CreateUserDto } from '../dtos/create-user.dto';
 import { UpdateUserDto } from '../dtos/update-user.dto';
 import { UserDetailDto } from '../dtos/user-detail.dto';
 import { User } from '../../domain/entities/user.entity';
+import {
+  I_DEPARTMENT_REPOSITORY,
+  type IDepartmentRepository,
+} from '../../../departments/domain/repositories/department.repository.interface';
+import {
+  I_POSITION_REPOSITORY,
+  type IPositionRepository,
+} from '../../../positons/domain/repositories/position.repository.interface';
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject(I_USER_REPOSITORY)
     private readonly userRepo: IUserRepository,
-    private readonly prisma: PrismaService,
+    @Inject(I_DEPARTMENT_REPOSITORY)
+    private readonly departmentRepo: IDepartmentRepository,
+    @Inject(I_POSITION_REPOSITORY)
+    private readonly positionRepo: IPositionRepository,
   ) { }
 
   async create(dto: CreateUserDto) {
@@ -82,24 +93,79 @@ export class UsersService {
     if (dto.position_id !== undefined) user.position_id = dto.position_id;
     user.updatedAt = new Date();
 
-    const updatedUser = await this.userRepo.update(id, user);
+    await this.userRepo.update(id, user);
 
     if (dto.profile) {
-      await this.prisma.profile.upsert({
-        where: { user_id: id },
-        update: {
-          full_name: dto.profile.full_name,
-          phone: dto.profile.phone,
-        },
-        create: {
-          user_id: id,
-          full_name: dto.profile.full_name ?? '',
-          phone: dto.profile.phone,
-        },
-      });
+      await this.userRepo.upsertProfile(id, dto.profile);
     }
 
     return this.findOne(id, requesterId, permissionScope);
+  }
+
+  /**
+   * Cập nhật vị trí là một nghiệp vụ riêng với quyền `users:manage_position`.
+   * Manager chỉ được thực hiện với nhân sự thuộc phòng ban do chính họ quản lý.
+   */
+  async updatePosition(
+    id: number,
+    dto: UpdateUserDto,
+    requesterId: number,
+    permissionScope: string,
+  ) {
+    const invalidFields = Object.entries(dto)
+      .filter(([field, value]) => field !== 'position_id' && value !== undefined)
+      .map(([field]) => field);
+    console.log("DTO:", dto);
+    console.log("Invalid fields:", invalidFields);
+    if (invalidFields.length > 0 || dto.position_id === undefined) {
+      throw new BadRequestException(
+        'Chỉ được cập nhật trường position_id cho endpoint này.',
+      );
+    }
+
+    const targetUser = await this.findOneEntity(id);
+
+    if (permissionScope === 'own') {
+      if (targetUser.dept_id === null) {
+        throw new ForbiddenException(
+          'Không thể thiết lập vị trí cho nhân sự chưa thuộc phòng ban nào.',
+        );
+      }
+
+      const department = await this.departmentRepo.findById(targetUser.dept_id);
+      if (!department) {
+        throw new NotFoundException(
+          `Không tìm thấy phòng ban với ID ${targetUser.dept_id}`,
+        );
+      }
+      if (department.manager_id !== requesterId) {
+        throw new ForbiddenException(
+          'Chỉ trưởng phòng đang quản lý nhân sự này mới được cập nhật vị trí.',
+        );
+      }
+    }
+
+    if (dto.position_id !== null) {
+      if (targetUser.dept_id === null) {
+        throw new BadRequestException(
+          'Nhân sự cần thuộc một phòng ban trước khi được gán vị trí.',
+        );
+      }
+
+      const position = await this.positionRepo.findById(dto.position_id);
+      if (!position) {
+        throw new NotFoundException(`Không tìm thấy vị trí với ID ${dto.position_id}`);
+      }
+      if (position.dept_id !== targetUser.dept_id) {
+        throw new BadRequestException(
+          'Chỉ có thể gán vị trí thuộc cùng phòng ban với nhân sự.',
+        );
+      }
+    }
+
+    targetUser.position_id = dto.position_id;
+    targetUser.updatedAt = new Date();
+    return (await this.userRepo.update(id, targetUser)).toSafe();
   }
 
   async updateProfileImage(
@@ -111,18 +177,8 @@ export class UsersService {
   ) {
     // Thêm dòng này để kiểm tra quyền
     this.assertOwnScope(permissionScope, requesterId, userId);
-    const fieldToUpdate = type === 'avatar' ? 'avatarUrl' : 'coverUrl';
-
-    await this.prisma.profile.upsert({
-      where: { user_id: userId },
-      update: {
-        [fieldToUpdate]: imageUrl,
-      },
-      create: {
-        user_id: userId,
-        full_name: '', // Sẽ được cập nhật sau bởi hàm update()
-        [fieldToUpdate]: imageUrl,
-      },
+    await this.userRepo.upsertProfile(userId, {
+      [type === 'avatar' ? 'avatarUrl' : 'coverUrl']: imageUrl,
     });
   }
 

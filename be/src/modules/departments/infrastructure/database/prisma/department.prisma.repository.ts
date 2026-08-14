@@ -80,8 +80,8 @@ export class PrismaDepartmentRepository implements IDepartmentRepository {
   }
 
   async update(id: number, department: Department): Promise<Department> {
-    const updatedDept = await this.prisma.department.update({ 
-      where: { id }, 
+    const updatedDept = await this.prisma.department.update({
+      where: { id },
       data: {
         name: department.name,
         parent_id: department.parent_id,

@@ -10,6 +10,7 @@ import {
   UploadedFile
 } from '@nestjs/common';
 import { UsersService } from '../../application/services/users.service';
+import { CreateUserDto } from '../../application/dtos/create-user.dto';
 import { UpdateUserDto } from '../../application/dtos/update-user.dto';
 import { Permissions } from '../../../auth/presentation/decorators/permissions.decorator';
 import { CurrentUser } from '../../../auth/presentation/decorators/current-user.decorator';
@@ -95,5 +96,24 @@ export class UsersController {
   @Patch(':id/deactivate')
   deactivate(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.deactivate(id);
+  }
+
+  @Permissions('users:write')
+  @Audit('user:create', 'User')
+  @Post('/create')
+  create(@Body() dto: CreateUserDto) {
+    return this.usersService.create(dto);
+  }
+
+  @Permissions('users:manage_position')
+  @Audit('user:update_position', 'User')
+  @Patch(':id/position/update')
+  updatePosition(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateUserDto,
+    @CurrentUser() currentUser: RequestUser,
+    @PermissionScope() scope: string,
+  ) {
+    return this.usersService.updatePosition(id, dto, currentUser.id, scope);
   }
 }

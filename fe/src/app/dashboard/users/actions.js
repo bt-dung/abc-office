@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { beJson } from "@/lib/api";
 
 export async function createUser({ username, email, password, role_id, dept_id }) {
-  await beJson("/users", {
+  await beJson("/users/create", {
     method: "POST",
     body: JSON.stringify({
       username,
